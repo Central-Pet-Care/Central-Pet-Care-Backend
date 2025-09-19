@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/userRouter.js";
 import serviceRouter from "./routes/serviceRouter.js";
+import bookingRouter from "./routes/bookingRouter.js";
+
 dotenv.config()
 
 const app = express();
@@ -44,6 +46,7 @@ mongoose.connect(connectionString)
 
   app.use("/api/users", userRouter)
   app.use("/api/service",serviceRouter)
+  app.use("/api/booking",bookingRouter)
 
 
 app.listen(5000, () => {
