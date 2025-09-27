@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/userRouter.js";
+
+
 dotenv.config()
 
 const app = express();
@@ -42,6 +44,8 @@ mongoose.connect(connectionString)
   });
 
   app.use("/api/users", userRouter)
+
+  
 
 
 app.listen(5000, () => {
