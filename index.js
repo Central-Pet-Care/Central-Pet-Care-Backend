@@ -6,6 +6,8 @@ import cors from "cors";
 import userRouter from "./routes/userRouter.js";
 import productRouter from "./routes/productRouter.js";
 import { createUser } from "./controllers/userController.js";
+import orderRouter from "./routes/orderRouter.js";
+import categoryRouter from "./routes/categoryRouter.js";
 
 dotenv.config()
 
@@ -46,6 +48,8 @@ mongoose.connect(connectionString)
 
   app.use("/api/users", userRouter)
   app.use("/api/products", productRouter)
+  app.use("/api/orders", orderRouter)
+  app.use("/api/categories", categoryRouter)
   app.post("/api/users/register", createUser)
   
 
