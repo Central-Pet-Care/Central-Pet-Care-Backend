@@ -34,18 +34,20 @@ export async function createBooking(req, res) {
   }
 }
 
-// ✅ Delete booking (Customer only if Pending)
+// ✅ Delete booking (Customer if Pending, Admin always)
 export async function deleteBooking(req, res) {
   try {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    if (booking.userEmail !== req.user.email) {
-      return res.status(403).json({ message: "Not authorized" });
-    }
-
-    if (booking.bookingStatus !== "Pending") {
-      return res.status(400).json({ message: "Cannot delete after confirmation" });
+    // 🔹 If not admin, enforce customer rules
+    if (!isAdmin(req)) {
+      if (booking.userEmail !== req.user.email) {
+        return res.status(403).json({ message: "Not authorized" });
+      }
+      if (booking.bookingStatus !== "Pending") {
+        return res.status(400).json({ message: "Cannot delete after confirmation" });
+      }
     }
 
     await booking.deleteOne();
