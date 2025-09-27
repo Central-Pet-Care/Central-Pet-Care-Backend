@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/userRouter.js";
+import petRouter from "./routes/petRouter.js";
 dotenv.config()
 
 const app = express();
@@ -42,6 +43,7 @@ mongoose.connect(connectionString)
   });
 
   app.use("/api/users", userRouter)
+  app.use("/api/pets",petRouter)
 
 
 app.listen(5000, () => {
