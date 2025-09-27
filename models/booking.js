@@ -1,50 +1,53 @@
 import mongoose from "mongoose";
 
-const bookingSchema = new mongoose.Schema(
-  {
-    bookingId: {
-      type: String,
-      required: true,
-      unique: true,
-    },
-    serviceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "services",
-      required: true,
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "users",
-      required: true,
-    },
-    date: {
-      type: Date,
-      required: true,
-    },
-    status: {
-      type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
-      default: "pending",
-    },
-    notes: {
-      type: String,
-    },
-    
-    paymentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Payment",
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+const bookingSchema = new mongoose.Schema({
+  bookingId: {
+    type: String,
+    unique: true, // avoid duplicates
   },
-  { timestamps: true }
-);
 
-const Booking = mongoose.model("booking", bookingSchema);
+  serviceId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "services",
+  required: true,
+},
+
+  userEmail: {
+    type: String,
+    required: true,
+  },
+
+  bookingDate: {
+    type: Date,
+    required: true,
+  },
+
+  notes: {
+    type: String,
+    default: "",
+  },
+
+  bookingStatus: {
+    type: String,
+    enum: ["Pending", "Confirmed", "Cancelled", "Completed"],
+    default: "Pending",
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// Auto-generate bookingId if not provided
+bookingSchema.pre("save", async function (next) {
+  if (!this.bookingId) {
+    const count = await mongoose.model("bookings").countDocuments();
+    this.bookingId = `BKG${(count + 1).toString().padStart(4, "0")}`;
+  }
+  next();
+});
+
+const Booking = mongoose.model("bookings", bookingSchema);
+
 export default Booking;

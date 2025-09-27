@@ -1,22 +1,36 @@
 import express from "express";
 import {
   createBooking,
-  getBookings,
+  deleteBooking,
+  getAllBookings,
   getBookingById,
   updateBooking,
-  deleteBooking,
-  linkPaymentToBooking,
+  changeBookingStatus,
+  trackMyBookings,
 } from "../controllers/bookingController.js";
 
-const bookingRouter = express.Router();
+const router = express.Router();
 
-bookingRouter.post("/", createBooking);
-bookingRouter.get("/", getBookings);
-bookingRouter.get("/:id", getBookingById);
-bookingRouter.put("/:id", updateBooking);
-bookingRouter.delete("/:id", deleteBooking);
+// Customer creates booking
+router.post("/", createBooking);
 
-//  special route: link booking with payment
-bookingRouter.post("/link-payment", linkPaymentToBooking);
+// Customer deletes their booking
+router.delete("/:id", deleteBooking);
 
-export default bookingRouter;
+// Admin gets all bookings
+router.get("/", getAllBookings);
+
+// Customer tracks their bookings
+router.get("/user/me", trackMyBookings);
+
+// Customer updates their booking
+router.put("/:id", updateBooking);
+
+
+// Get single booking (Customer/Admin)
+router.get("/:id", getBookingById);
+
+// Admin changes booking status
+router.patch("/:id/status", changeBookingStatus);
+
+export default router;

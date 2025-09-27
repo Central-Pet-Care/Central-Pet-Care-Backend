@@ -4,18 +4,18 @@ const serviceSchema = new mongoose.Schema({
   serviceId: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
-  name: {
+  serviceName: {   // ✅ new single field
     type: String,
     required: true,
   },
-  category: {
+  miniDescription: {
     type: String,
-    required: true, // e.g. "Vet", "Grooming", "Training", "Emergency"
+    maxlength: 100, // short description (limit for UI cards)
   },
   description: {
-    type: String,
+    type: String, // full details
   },
   price: {
     type: Number,
@@ -24,14 +24,16 @@ const serviceSchema = new mongoose.Schema({
   duration: {
     type: String, // e.g. "30 mins", "1 hour"
   },
-  image: {
-    type: String,
-    default: "https://via.placeholder.com/150",
-  },
+  images: [
+    {
+      type: String,
+      default: "https://via.placeholder.com/150", // default placeholder
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
-  }
+  },
 });
 
 const Service = mongoose.model("services", serviceSchema);
