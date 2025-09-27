@@ -3,7 +3,7 @@ import { createUser, deleteUser, getUser, loginUser } from '../controllers/userC
 
 const userRouter = express.Router();
 
-userRouter.post("/", createUser)
+userRouter.post("/register", createUser)
 userRouter.get("/", getUser)
 userRouter.delete("/:name", deleteUser)
 userRouter.post("/login", loginUser)
