@@ -4,10 +4,12 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/userRouter.js";
+import petRouter from "./routes/petRouter.js";
 import productRouter from "./routes/productRouter.js";
 import { createUser } from "./controllers/userController.js";
 import orderRouter from "./routes/orderRouter.js";
 import categoryRouter from "./routes/categoryRouter.js";
+
 
 dotenv.config()
 
@@ -46,11 +48,13 @@ mongoose.connect(connectionString)
     console.log("Error details:", err.message);
   });
 
-  app.use("/api/users", userRouter)
-  app.use("/api/products", productRouter)
-  app.use("/api/orders", orderRouter)
-  app.use("/api/categories", categoryRouter)
-  app.post("/api/users/register", createUser)
+ app.use("/api/users", userRouter);
+app.use("/api/pets", petRouter);
+app.use("/api/products", productRouter);
+app.use("/api/orders", orderRouter);
+app.use("/api/categories", categoryRouter);
+app.post("/api/users/register", createUser);
+
   
 
 
