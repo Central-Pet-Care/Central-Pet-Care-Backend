@@ -48,6 +48,7 @@ export function createUser(req, res){
     newUserData.password = bcrypt.hashSync(newUserData.password, 10)
     
     const user = new User(newUserData)
+    
 
     user.save().then(()=>{
         res.json({
@@ -163,5 +164,7 @@ export function isCustomer(req){
 
         return true
 }
+
+
 
 
