@@ -9,11 +9,8 @@ import productRouter from "./routes/productRouter.js";
 import { createUser } from "./controllers/userController.js";
 import orderRouter from "./routes/orderRouter.js";
 import categoryRouter from "./routes/categoryRouter.js";
-<<<<<<< HEAD
-=======
 
 
->>>>>>> origin/main
 dotenv.config()
 
 const app = express();
@@ -51,17 +48,10 @@ mongoose.connect(connectionString)
     console.log("Error details:", err.message);
   });
 
-<<<<<<< HEAD
-app.use("/api/users", userRouter);
-app.use("/api/pets", petRouter);
-app.use("/api/products", productRouter);
-app.use("/api/orders", orderRouter);
-=======
  app.use("/api/users", userRouter);
 app.use("/api/pets", petRouter);
 app.use("/api/products", productRouter);
 app.use("/api/orders", orderRouter)
->>>>>>> origin/main
 app.use("/api/categories", categoryRouter);
 app.post("/api/users/register", createUser);
 
