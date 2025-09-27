@@ -51,7 +51,7 @@ mongoose.connect(connectionString)
  app.use("/api/users", userRouter);
 app.use("/api/pets", petRouter);
 app.use("/api/products", productRouter);
-app.use("/api/orders", orderRouter);
+app.use("/api/orders", orderRouter)
 app.use("/api/categories", categoryRouter);
 app.post("/api/users/register", createUser);
 
