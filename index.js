@@ -4,11 +4,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/userRouter.js";
-
 import adoptionRouter from "./routes/adoptionRouter.js";
-
- 
-
 import petRouter from "./routes/petRouter.js";
 import productRouter from "./routes/productRouter.js";
 import { createUser } from "./controllers/userController.js";
