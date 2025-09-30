@@ -1,6 +1,7 @@
 import Adoption from "../models/adoption.js";
 import { isAdmin } from "./userController.js";
-import User from "../models/user.js"; 
+import User from "../models/user.js";
+import Pet from "../models/pet.js";
 
 
 // Apply for adoption

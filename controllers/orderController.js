@@ -180,7 +180,7 @@ export function getOrderById(req, res) {
         return;
     }
 
-    const orderId = req.params.id;
+    const orderId = req.params.orderId;
 
     Order.findOne({ orderId: orderId }).then((order) => {
 
@@ -219,7 +219,7 @@ export function updateOrder(req, res) {
         return;
     }
 
-    const orderId = req.params.id;   // URL param → /orders/:id
+    const orderId = req.params.orderId;   // URL param → /orders/:id
     const updateData = req.body;     // e.g. { name, address, phone, orderedItems }
 
     Order.findOneAndUpdate(
@@ -256,7 +256,7 @@ export function deleteOrder(req, res) {
         return;
     }
 
-    const orderId = req.params.id;  // /orders/:id
+    const orderId = req.params.orderId;  // /orders/:id
 
     Order.findOneAndDelete({ orderId: orderId })
         .then((deletedOrder) => {
