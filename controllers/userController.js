@@ -168,6 +168,16 @@ export function isCustomer(req){
         return true
 }
 
+export const getUserByEmail = (req, res) => {
+    const email = req.params.email;
 
-
-
+    User.find({ email: email }).then((userList) => {
+        res.json({
+            List: userList
+        });
+    }).catch(() => {
+        res.json({
+            message: "Unsuccessfull."
+        });
+    });
+}

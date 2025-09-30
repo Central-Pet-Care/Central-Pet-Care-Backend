@@ -1,7 +1,13 @@
 import Adoption from "../models/adoption.js";
 import { isAdmin } from "./userController.js";
+<<<<<<< HEAD
 import User from "../models/user.js";
 import Pet from "../models/pet.js";
+=======
+import User from "../models/user.js"; 
+import Pet from "../models/pet.js";
+
+>>>>>>> 71dd1ce60376ffcc09251d4c20a674013f1c727c
 
 
 // Apply for adoption

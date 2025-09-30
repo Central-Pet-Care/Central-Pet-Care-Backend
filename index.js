@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRouter from "./routes/userRouter.js";
+import paymentRouter from "./routes/paymentRoutes.js";
 import serviceRouter from "./routes/serviceRouter.js";
 import bookingRouter from "./routes/bookingRouter.js";
 import adoptionRouter from "./routes/adoptionRouter.js";
@@ -26,20 +27,20 @@ app.use(express.json());
 
 
 app.use(
-    (req, res, next)=>{
-        
+  (req, res, next) => {
+
     const token = (req.header("Authorization"))?.replace("Bearer ", "")
 
-    if(token != null){
-        jwt.verify(token, process.env.SECRET,(error, decoded)=>{
-            if(!error){
-                req.user = decoded
-            }
-        })
+    if (token != null) {
+      jwt.verify(token, process.env.SECRET, (error, decoded) => {
+        if (!error) {
+          req.user = decoded
+        }
+      })
     }
     next()
 
-    }
+  }
 )
 
 const connectionString = process.env.MONGO_DB_URL;
@@ -53,25 +54,28 @@ mongoose.connect(connectionString)
     console.log("Error details:", err.message);
   });
 
-  app.use("/api/service",serviceRouter)
-  app.use("/api/booking",bookingRouter)
-  app.use("/api/adoptions", adoptionRouter)
- app.use("/api/users", userRouter);
+app.use("/api/service", serviceRouter)
+app.use("/api/booking", bookingRouter)
+app.use("/api/adoptions", adoptionRouter)
+app.use("/api/users", userRouter);
 app.use("/api/pets", petRouter);
 app.use("/api/products", productRouter);
 app.use("/api/orders", orderRouter)
 app.use("/api/categories", categoryRouter);
 app.post("/api/users/register", createUser);
+app.use("/api/payments", paymentRouter)
+
+
 
 app.listen(5000, () => {
   console.log(" Server is started on port 5000");
 });
 
-  //"email": "admin@example.com" - admin
-  //"password": "AdminPass123"
+//"email": "admin@example.com" - admin
+//"password": "AdminPass123"
 
-   // "email": "alice.williams@example.com" - customer
-   //"password": "CustomerPass123"
+// "email": "alice.williams@example.com" - customer
+//"password": "CustomerPass123"
 
-   //"email": "jane.smith@example.com", -customer
-   //"password": "1234",
+//"email": "jane.smith@example.com", -customer
+//"password": "1234",
