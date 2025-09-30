@@ -85,7 +85,7 @@ const orderSchema = new mongoose.Schema({
     }
 });
 
-// Auto-update `updatedAt` before save
+// Auto-update updatedAt before save
 orderSchema.pre("save", function (next) {
     this.updatedAt = Date.now();
     next();
