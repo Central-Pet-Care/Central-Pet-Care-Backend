@@ -19,6 +19,40 @@ export function getUser(req, res){
     })
 }
 
+// Get user by email
+export function getUserByEmail(req, res){
+    const { email } = req.params;
+    
+    User.findOne({ email: email }).then(
+        (user)=>{
+            if(user){
+                res.json({
+                    success: true,
+                    user: {
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        email: user.email,
+                        phone: user.phone,
+                        address: user.address,
+                        type: user.type
+                    }
+                })
+            } else {
+                res.status(404).json({
+                    success: false,
+                    message: "User not found"
+                })
+            }
+        }
+    ).catch((error)=>{
+        res.status(500).json({
+            success: false,
+            message: "Error fetching user data",
+            error: error.message
+        })
+    })
+}
+
 export function createUser(req, res){
 
     const newUserData = req.body
