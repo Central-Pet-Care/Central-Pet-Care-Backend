@@ -70,12 +70,3 @@ app.use("/api/payments", paymentRouter)
 app.listen(5000, () => {
   console.log(" Server is started on port 5000");
 });
-
-//"email": "admin@example.com" - admin
-//"password": "AdminPass123"
-
-// "email": "alice.williams@example.com" - customer
-//"password": "CustomerPass123"
-
-//"email": "jane.smith@example.com", -customer
-//"password": "1234",
