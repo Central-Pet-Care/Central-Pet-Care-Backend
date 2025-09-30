@@ -19,80 +19,50 @@ export function getUser(req, res){
     })
 }
 
-// Get user by email
-export function getUserByEmail(req, res){
-    const { email } = req.params;
-    
-    User.findOne({ email: email }).then(
-        (user)=>{
-            if(user){
-                res.json({
-                    success: true,
-                    user: {
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        email: user.email,
-                        phone: user.phone,
-                        address: user.address,
-                        type: user.type
-                    }
-                })
-            } else {
-                res.status(404).json({
-                    success: false,
-                    message: "User not found"
-                })
-            }
-        }
-    ).catch((error)=>{
-        res.status(500).json({
-            success: false,
-            message: "Error fetching user data",
-            error: error.message
-        })
-    })
-}
+export async function createUser(req, res) {
+  try {
+    const newUserData = req.body;
 
-export function createUser(req, res){
-
-    const newUserData = req.body
-
-    if(newUserData.type == "admin"){
-
-        if(req.user == null){
-            res.json({
-                message: "Please login as administrator to create admin accounts"
-            })
-            return
-
-        }
-
-         if(req.user.type != "admin"){
-            res.json({
-                message: "Please login as administrator to create admin accounts"
-            })
-            return
-
-        }
-
-        
-
+    // ✅ Check if email already exists
+    const existingUser = await User.findOne({ email: newUserData.email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered."
+      });
     }
 
-    newUserData.password = bcrypt.hashSync(newUserData.password, 10)
-    
-    const user = new User(newUserData)
+    // ✅ Prevent admin account creation from public route
+    if (newUserData.type === "admin") {
+      if (!req.user || req.user.type !== "admin") {
+        return res.status(403).json({
+          success: false,
+          message: "Only logged-in administrators can create admin accounts."
+        });
+      }
+    }
 
-    user.save().then(()=>{
-        res.json({
-            message: "User created."
-        })
-    }).catch(()=>{
-        res.json({
-            message: "User not created."
-        })
-    })
- }
+    // ✅ Hash password
+    newUserData.password = bcrypt.hashSync(newUserData.password, 10);
+
+    // ✅ Save user
+    const user = new User(newUserData);
+    await user.save();
+
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully."
+    });
+
+  } catch (error) {
+    console.error("User creation failed:", error);
+    return res.status(400).json({
+      success: false,
+      message: error.message || "User not created."
+    });
+  }
+}
+
 
 // export function createUser(req, res) {
 //     const newUserData = req.body;
@@ -197,5 +167,7 @@ export function isCustomer(req){
 
         return true
 }
+
+
 
 

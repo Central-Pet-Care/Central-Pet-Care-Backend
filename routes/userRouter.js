@@ -3,7 +3,7 @@ import { createUser, deleteUser, getUser, loginUser, getUserByEmail } from '../c
 
 const userRouter = express.Router();
 
-userRouter.post("/", createUser)
+userRouter.post("/register", createUser)
 userRouter.get("/", getUser)
 userRouter.get("/email/:email", getUserByEmail)  // New route for getting user by email
 userRouter.delete("/:name", deleteUser)
