@@ -60,11 +60,11 @@ const adoptionSchema = mongoose.Schema({
 
   applyDate: {
     type: Date,
-    default: Date.now, // ✅ automatically store when applied
+    default: Date.now, 
   },
 
   adoptionDate: {
-    type: Date, // only filled when status = "Completed"
+    type: Date, 
     default: null,
   },
 });
