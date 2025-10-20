@@ -23,7 +23,7 @@ export async function createUser(req, res) {
   try {
     const newUserData = req.body;
 
-    // ✅ Check if email already exists
+    //  Check if email already exists
     const existingUser = await User.findOne({ email: newUserData.email });
     if (existingUser) {
       return res.status(400).json({
@@ -32,7 +32,7 @@ export async function createUser(req, res) {
       });
     }
 
-    // ✅ Prevent admin account creation from public route
+    //  Prevent admin account creation from public route
     if (newUserData.type === "admin") {
       if (!req.user || req.user.type !== "admin") {
         return res.status(403).json({
@@ -42,10 +42,10 @@ export async function createUser(req, res) {
       }
     }
 
-    // ✅ Hash password
+    //  Hash password
     newUserData.password = bcrypt.hashSync(newUserData.password, 10);
 
-    // ✅ Save user
+    //  Save user
     const user = new User(newUserData);
     await user.save();
 
