@@ -13,7 +13,7 @@ const adoptionSchema = mongoose.Schema({
 
  alternateEmail: {
     type: String,
-    default: null, // optional
+    default: null, 
   },
 
   personalInfo: {
@@ -34,7 +34,7 @@ const adoptionSchema = mongoose.Schema({
 
     age: {
       type: Number,
-      required: true, // user must provide
+      required: true, 
     },
   },
 
