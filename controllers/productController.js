@@ -1,7 +1,7 @@
 import Product from "../models/product.js";
 import { isAdmin } from "./userController.js";
 
-// 🟢 Create a new product
+
 export async function createProduct(req, res) {
   try {
     if (!isAdmin(req)) {
@@ -10,12 +10,12 @@ export async function createProduct(req, res) {
       });
     }
 
-    // Find latest product ID
+  
     const latestProduct = await Product.find().sort({ createdAt: -1 }).limit(1);
     let productId;
 
     if (latestProduct.length === 0) {
-      productId = "PROD0001"; // First product
+      productId = "PROD0001"; 
     } else {
       const currentId = latestProduct[0].productId;
       const numberString = currentId.replace("PROD", "");
@@ -41,10 +41,10 @@ export async function createProduct(req, res) {
   }
 }
 
-// 🟢 Get All Products (with optional category filter)
+
 export async function getProducts(req, res) {
   try {
-    const { category } = req.query; // ?category=PetFoods / ?category=Toys
+    const { category } = req.query; 
     const filter = {};
 
     if (category) {
@@ -64,10 +64,10 @@ export async function getProducts(req, res) {
   }
 }
 
-// 🟢 Get Multiple Products by productId array
+
 export async function getProductsByIds(req, res) {
   try {
-    const { ids } = req.body; // ["PROD0001", "PROD0002"]
+    const { ids } = req.body; 
 
     if (!ids || !Array.isArray(ids)) {
       return res.status(400).json({ message: "Invalid request, ids array required" });
@@ -85,7 +85,7 @@ export async function getProductsByIds(req, res) {
 }
 
 
-// 🟢 Get Single Product by MongoDB _id
+
 export async function getProductById(req, res) {
   try {
     const product = await Product.findOne({ productId: req.params.productId });
@@ -105,7 +105,6 @@ export async function getProductById(req, res) {
 
 
 
-// 🟢 Update Product
 export async function updateProduct(req, res) {
   try {
     if (!isAdmin(req)) {
@@ -115,7 +114,7 @@ export async function updateProduct(req, res) {
     }
 
     const updatedProduct = await Product.findOneAndUpdate(
-      { productId: req.params.productId }, // ✅ use productId instead of _id
+      { productId: req.params.productId }, 
       req.body,
       { new: true }
     );
@@ -139,7 +138,6 @@ export async function updateProduct(req, res) {
 }
 
 
-// 🟢 Delete Product
 export async function deleteProduct(req, res) {
   try {
     if (!isAdmin(req)) {

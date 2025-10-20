@@ -22,7 +22,7 @@ const orderSchema = new mongoose.Schema({
     {
       itemType: {
         type: String,
-        enum: ["product", "service", "pet"], // ✅ 3 types
+        enum: ["product", "service", "pet"], 
         required: true,
       },
       itemId: {
@@ -56,8 +56,8 @@ const orderSchema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: ["Pending", "Preparing", "Processing", "Shipped", "Delivered", "Cancelled"], // 🟢 Fixed
-    default: "Pending", // 🟢 default = Pending
+    enum: ["Pending", "Preparing", "Processing", "Shipped", "Delivered", "Cancelled"], 
+    default: "Pending", 
   },
 
   name: { type: String, required: true },
@@ -77,3 +77,7 @@ orderSchema.pre("save", function (next) {
 const Order = mongoose.model("orders", orderSchema);
 
 export default Order;
+
+
+
+
