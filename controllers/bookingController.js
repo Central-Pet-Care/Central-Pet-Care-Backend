@@ -1,8 +1,60 @@
 import Booking from "../models/booking.js";
 import Service from "../models/service.js";
 import { isAdmin } from "./userController.js";
+import nodemailer from "nodemailer"; //  Nodemailer import
 
-// ✅ Create booking (Customer only)
+//  Nodemailer Transporter Setup
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER, // .env file 
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+//  Helper Function: Send Email
+const sendConfirmationEmail = (to, serviceName, bookingDate) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject: `✅ Your booking for ${serviceName} is Confirmed!`,
+    text: `Hello,\n\nYour booking for the "${serviceName}" service on ${new Date(
+      bookingDate
+    ).toLocaleDateString()} has been confirmed.\n\nThank you for choosing Central Pet Care!\n\n🐾 Central Pet Care Team`,
+  };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) console.log("❌ Email sending failed:", err);
+    else console.log("📩 Email sent:", info.response);
+  });
+};
+
+// Helper: Send cancellation email
+const sendCancellationEmail = (to, serviceName, bookingDate) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject: `❌ Your booking for ${serviceName} has been Cancelled`,
+    html: `
+      <div style="font-family: Arial, sans-serif; color: #333;">
+        <h2 style="color: #E53935;">❌ Booking Cancelled</h2>
+        <p>Hello,</p>
+        <p>We're sorry to inform you that your booking for the <b>${serviceName}</b> service on 
+        <b>${new Date(bookingDate).toLocaleDateString()}</b> has been cancelled.</p>
+        <p>If you have any questions or want to reschedule, please contact us.</p>
+        <p>Thank you for choosing <b>Central Pet Care</b>! 🐾</p>
+        <p style="margin-top: 20px;">— Central Pet Care Team</p>
+      </div>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) console.log("❌ Email sending failed (cancellation):", err);
+    else console.log("📩 Cancellation email sent:", info.response);
+  });
+};
+
+//  Create booking (Customer only)
 export async function createBooking(req, res) {
   try {
     if (req.user.type === "admin") {
@@ -34,7 +86,7 @@ export async function createBooking(req, res) {
   }
 }
 
-// ✅ Delete booking (Customer if Pending, Admin always)
+//  Delete booking (Customer if Pending, Admin always)
 export async function deleteBooking(req, res) {
   try {
     const booking = await Booking.findById(req.params.id);
@@ -57,7 +109,7 @@ export async function deleteBooking(req, res) {
   }
 }
 
-// ✅ Get all bookings (Admin only)
+//  Get all bookings (Admin only)
 export async function getAllBookings(req, res) {
   try {
     if (!isAdmin(req)) {
@@ -71,7 +123,7 @@ export async function getAllBookings(req, res) {
   }
 }
 
-// ✅ Update booking (Customer only if Pending)
+//  Update booking (Customer only if Pending)
 export async function updateBooking(req, res) {
   try {
     const booking = await Booking.findById(req.params.id);
@@ -96,7 +148,7 @@ export async function updateBooking(req, res) {
   }
 }
 
-// ✅ Get single booking (Owner or Admin)
+//  Get single booking (Owner or Admin)
 export const getBookingById = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate("serviceId");
@@ -112,7 +164,7 @@ export const getBookingById = async (req, res) => {
   }
 };
 
-// ✅ Track my bookings (Customer only)
+//  Track my bookings (Customer only)
 export const trackMyBookings = async (req, res) => {
   try {
     if (req.user.type === "admin") {
@@ -131,26 +183,56 @@ export const trackMyBookings = async (req, res) => {
 };
 
 
-// ✅ Change booking status (Admin only)
 export const changeBookingStatus = async (req, res) => {
   try {
+    // Check if the user is an Admin
     if (!isAdmin(req)) {
       return res.status(403).json({ message: "Admin only" });
     }
 
     const { status } = req.body; // "Confirmed", "Cancelled", "Completed"
-    const booking = await Booking.findById(req.params.id);
-    if (!booking) return res.bookingStatus(404).json({ message: "Booking not found" });
+    const booking = await Booking.findById(req.params.id).populate("serviceId", "serviceName");  // Populate the serviceName
 
-    if (!["Confirmed", "Cancelled", "Completed"].includes(status)) {
-      return res.bookingStatus(400).json({ message: "Invalid status" });
+    // If booking is not found
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
     }
 
+    // Validate the status
+    if (!["Confirmed", "Cancelled", "Completed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    // Update the booking status
     booking.bookingStatus = status;
     const saved = await booking.save();
 
+    // If status is "Confirmed", send the confirmation email
+    if (status === "Confirmed") {
+      const serviceName = booking.serviceId?.serviceName || "Unknown Service";  // Ensure serviceName is available
+      sendConfirmationEmail(
+        booking.userEmail,
+        serviceName,
+        booking.bookingDate
+      );
+    }
+
+    // If status is "Cancelled", send the cancellation email
+    if (status === "Cancelled") {
+      const serviceName = booking.serviceId?.serviceName || "Unknown Service";  // Ensure serviceName is available
+      sendCancellationEmail(
+        booking.userEmail,
+        serviceName,
+        booking.bookingDate
+      );
+    }
+
+    // Send response with booking status
     res.json({ message: `Booking ${status} successfully ✅`, booking: saved });
   } catch (error) {
-    res.bookingStatus(500).json({ message: error.message });
+    console.error("❌ Error in changeBookingStatus:", error);
+    res.status(500).json({ message: error.message });
   }
 };
+
+

@@ -6,7 +6,7 @@ const serviceSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  serviceName: {   // ✅ new single field
+  serviceName: {   //  new single field
     type: String,
     required: true,
   },
