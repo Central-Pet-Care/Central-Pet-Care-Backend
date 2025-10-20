@@ -49,22 +49,22 @@ const productSchema = new mongoose.Schema(
       default: "Available",
     },
 
-    // ✅ Common Pet Product Details
+    
     brand: { type: String, default: "" },
     weight: { type: String, default: "" },
     size: { type: [String], default: [] },
     material: { type: String, default: "" },
     ageGroup: { type: String, default: "" },
 
-    // ✅ Optional Info
+    
     expiryDate: { type: Date },
     origin: { type: String, default: "" },
 
-    // ✅ Flexible arrays
+    
     features: { type: [String], default: [] },
     tags: { type: [String], default: [] },
 
-    // ✅ For Pet Food / Medicine
+    
     ingredients: { type: [String], default: [] },
     nutrition: {
       protein: { type: String, default: "" },

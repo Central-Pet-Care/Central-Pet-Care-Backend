@@ -13,7 +13,7 @@ export async function createOrder(req, res) {
   }
 
   try {
-    // ✅ Get count of existing orders to generate new unique orderId
+   
     const orderCount = await Order.countDocuments();
     const newNumber = (orderCount + 1).toString().padStart(4, "0");
     const orderId = "CBC" + newNumber;
@@ -80,7 +80,7 @@ export async function createOrder(req, res) {
       });
     }
 
-    // ✅ Required fields fill / fallback
+
     newOrderData.orderedItems = newItemsArray;
     newOrderData.orderId = orderId;
     newOrderData.email = req.user.email;
@@ -105,8 +105,6 @@ export async function createOrder(req, res) {
   }
 }
 
-
-// ------------------ GET ALL ORDERS ------------------
 export function getOrders(req, res) {
   if (!req.user) {
     return res.status(403).json({ message: "Please login to view orders" });
@@ -134,7 +132,33 @@ export function getOrders(req, res) {
     });
 }
 
-// ------------------ GET ORDER BY ID ------------------
+export async function getOrderByEmail(req, res) {
+  try {
+    const email = req.query.email;
+    
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const orderList = await Order.find({ email }).sort({ createdAt: -1 });
+
+    if (!orderList.length) {
+      return res.status(404).json({ message: "No orders found for this user." });
+    }
+
+    res.status(200).json({
+      count: orderList.length,
+      orders: orderList,
+    });
+  } catch (error) {
+    console.error("ORDER FETCH ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
+
 export function getOrderById(req, res) {
   if (!req.user) {
     return res.status(403).json({ message: "Please login to view order details" });
@@ -143,7 +167,7 @@ export function getOrderById(req, res) {
   const orderId = req.params.orderId;
 
   Order.findOne({ orderId: orderId })
-    .populate("user", "firstName lastName email phone") // 👈 මෙතනට user details ගන්න
+    .populate("user", "firstName lastName email phone") 
     .then((order) => {
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
@@ -158,7 +182,6 @@ export function getOrderById(req, res) {
     });
 }
 
-// ------------------ UPDATE ORDER ------------------
 export function updateOrder(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Only administrators can update orders" });
@@ -182,7 +205,7 @@ export function updateOrder(req, res) {
     });
 }
 
-// ------------------ DELETE ORDER ------------------
+
 export function deleteOrder(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Only administrators can delete orders" });
