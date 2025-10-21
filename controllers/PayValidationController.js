@@ -96,7 +96,7 @@ export async function processDirectPayment(req, res) {
       customerProvince = order.province || 'Province not provided';
     }
 
-    // Handle COD
+    //  COD
     if (paymentMethod === 'cod') {
       const payment = new Payment({
         orderId: orderId,
@@ -142,7 +142,7 @@ export async function processDirectPayment(req, res) {
       });
     }
 
-    // Handle Bank Transfer
+    //  Bank Transfer
     if (paymentMethod === 'bank_transfer') {
       const payment = new Payment({
         orderId: orderId,
@@ -175,6 +175,38 @@ export async function processDirectPayment(req, res) {
       });
 
       await payment.save();
+      
+      // Auto-link any orphaned receipts that were uploaded before payment was created
+      try {
+        const { GridFSBucket } = await import('mongodb');
+        const mongoose = await import('mongoose');
+        const bucket = new GridFSBucket(mongoose.default.connection.db, {
+          bucketName: "bankReceipts"
+        });
+        
+        // Find any receipts uploaded for this orderId
+        const receipts = await bucket.find({ "metadata.orderId": orderId }).toArray();
+        
+        if (receipts.length > 0) {
+          // Link the most recent receipt to this payment
+          const latestReceipt = receipts[receipts.length - 1];
+          payment.bankReceiptId = latestReceipt._id;
+          payment.bankReceiptFilename = latestReceipt.filename;
+          if (latestReceipt.metadata) {
+            payment.bankDetails = {
+              bankName: latestReceipt.metadata.bankName || 'ABC Bank',
+              accountNumber: latestReceipt.metadata.accountNumber || '9535942775533',
+              transferDate: latestReceipt.metadata.uploadedAt || new Date()
+            };
+          }
+          await payment.save();
+          console.log(`✅ Auto-linked receipt ${latestReceipt._id} to new payment ${payment._id}`);
+        }
+      } catch (linkError) {
+        console.error('Error auto-linking receipt:', linkError);
+        // Don't fail the payment creation if linking fails
+      }
+      
       await Order.findOneAndUpdate(
         { orderId: orderId }, 
         { paymentId: payment._id, status: 'Processing' }
@@ -191,7 +223,7 @@ export async function processDirectPayment(req, res) {
       });
     }
 
-    // Handle PayHere Card Payment
+    // Card Payment
     if (paymentMethod === 'payhere' && cardDetails) {
       const cardNumber = cardDetails.cardNumber.replace(/\s/g, '');
       const cardConfig = TEST_CARDS[cardNumber];
