@@ -13,6 +13,7 @@ import productRouter from "./routes/productRouter.js";
 import { createUser } from "./controllers/userController.js";
 import orderRouter from "./routes/orderRouter.js";
 import categoryRouter from "./routes/categoryRouter.js";
+import { initializeGridFS } from "./controllers/paymentController.js";
 
 
 dotenv.config()
@@ -48,6 +49,8 @@ const connectionString = process.env.MONGO_DB_URL;
 mongoose.connect(connectionString)
   .then(() => {
     console.log("✅ Database connected.");
+    // Initialize GridFS after database connection
+    initializeGridFS();
   })
   .catch((err) => {
     console.log(" Database connection failed.");
