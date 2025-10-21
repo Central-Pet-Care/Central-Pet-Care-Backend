@@ -51,3 +51,8 @@ bookingSchema.pre("save", async function (next) {
 const Booking = mongoose.model("bookings", bookingSchema);
 
 export default Booking;
+
+
+
+
+

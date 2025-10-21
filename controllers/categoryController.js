@@ -1,7 +1,6 @@
 import Category from "../models/category.js";
 import { isAdmin } from "./userController.js";
 
-// ✅ Create new category
 export function createCategory(req, res) {
     if (!isAdmin(req)) {
         return res.status(403).json({
@@ -14,7 +13,7 @@ export function createCategory(req, res) {
         let categoryId;
 
         if (latestCategory.length === 0) {
-            categoryId = "CAT0001";   // first category
+            categoryId = "CAT0001"; 
         } else {
             const currentId = latestCategory[0].categoryId;
             const numberString = currentId.replace("CAT", "");
@@ -49,7 +48,7 @@ export function createCategory(req, res) {
     });
 }
 
-// ✅ Get all categories
+//  Get all categories
 export function getCategories(req, res) {
     Category.find()
         .then((categories) => {
@@ -65,7 +64,7 @@ export function getCategories(req, res) {
         });
 }
 
-// ✅ Get category by ID
+//  Get category by ID
 export function getCategoryById(req, res) {
     Category.findOne({ categoryId: req.params.id })
         .then((category) => {
@@ -83,7 +82,7 @@ export function getCategoryById(req, res) {
         });
 }
 
-// ✅ Update category
+//  Update category
 export function updateCategory(req, res) {
     if (!isAdmin(req)) {
         return res.status(403).json({
@@ -113,7 +112,7 @@ export function updateCategory(req, res) {
         });
 }
 
-// ✅ Delete category
+//  Delete category
 export function deleteCategory(req, res) {
     if (!isAdmin(req)) {
         return res.status(403).json({

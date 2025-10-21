@@ -13,7 +13,7 @@ const adoptionSchema = mongoose.Schema({
 
  alternateEmail: {
     type: String,
-    default: null, // optional
+    default: null, 
   },
 
   personalInfo: {
@@ -34,7 +34,7 @@ const adoptionSchema = mongoose.Schema({
 
     age: {
       type: Number,
-      required: true, // user must provide
+      required: true, 
     },
   },
 
@@ -60,11 +60,11 @@ const adoptionSchema = mongoose.Schema({
 
   applyDate: {
     type: Date,
-    default: Date.now, // ✅ automatically store when applied
+    default: Date.now, 
   },
 
   adoptionDate: {
-    type: Date, // only filled when status = "Completed"
+    type: Date, 
     default: null,
   },
 });
