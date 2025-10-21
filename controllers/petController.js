@@ -3,9 +3,6 @@ import mongoose from "mongoose";
 import Pet from "../models/pet.js";
 import { isAdmin } from "./userController.js";
 
-/* ---------------------------------------------------
-   Helper: Generate sequential pet IDs (e.g., PET0001)
---------------------------------------------------- */
 async function generatePetId() {
   const result = await Pet.aggregate([
     { $match: { petId: { $regex: /^PET\d+$/ } } },
@@ -30,9 +27,6 @@ async function generatePetId() {
   return `PET${String(nextNumber).padStart(4, "0")}`;
 }
 
-/* ---------------------------------------------------
-   Create Pet (Admin or Public Submission)
---------------------------------------------------- */
 export async function createPet(req, res) {
   try {
     const petId = await generatePetId();
@@ -77,9 +71,7 @@ export async function createPet(req, res) {
   }
 }
 
-/* ---------------------------------------------------
-   Get Pets (Public)
---------------------------------------------------- */
+   //Get Pets (Public)
 export const getPets = async (req, res) => {
   try {
     const pets = await Pet.find({ isApproved: true });
@@ -89,9 +81,8 @@ export const getPets = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Get Single Pet
---------------------------------------------------- */
+
+   //Get Single Pet
 export const getPetDetails = async (req, res) => {
   try {
     const { petId } = req.params;
@@ -103,9 +94,6 @@ export const getPetDetails = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Update Pet (Admin)
---------------------------------------------------- */
 export const updatePet = async (req, res) => {
   if (!isAdmin(req))
     return res.status(403).json({ message: "Admin access required" });
@@ -123,9 +111,6 @@ export const updatePet = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Delete Pet (Admin)
---------------------------------------------------- */
 export const deletePet = async (req, res) => {
   if (!isAdmin(req))
     return res.status(403).json({ message: "Admin access required" });
@@ -141,9 +126,7 @@ export const deletePet = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Approve Pet (Admin)
---------------------------------------------------- */
+
 export const approvePet = async (req, res) => {
   if (!isAdmin(req))
     return res.status(403).json({ message: "Admin access required" });
@@ -174,9 +157,6 @@ export const approvePet = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Reject Pet (Admin)
---------------------------------------------------- */
 export const rejectPet = async (req, res) => {
   if (!isAdmin(req))
     return res.status(403).json({ message: "Admin access required" });
@@ -205,9 +185,6 @@ export const rejectPet = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Get Pending Pets (Admin)
---------------------------------------------------- */
 export const getPendingPets = async (req, res) => {
   try {
     const pendingPets = await Pet.find({ isApproved: false });
@@ -219,9 +196,6 @@ export const getPendingPets = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Get Pending Public Submissions (Admin)
---------------------------------------------------- */
 export const getPendingPublicPets = async (req, res) => {
   try {
     const pendingPets = await Pet.find({
@@ -237,9 +211,6 @@ export const getPendingPublicPets = async (req, res) => {
   }
 };
 
-/* ---------------------------------------------------
-   Add / Delete Health Records (Admin)
---------------------------------------------------- */
 export const addHealthRecord = async (req, res) => {
   if (!isAdmin(req))
     return res.status(403).json({ message: "Admin access required" });
