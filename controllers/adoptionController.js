@@ -1,7 +1,11 @@
 import Adoption from "../models/adoption.js";
 import { isAdmin } from "./userController.js";
-import User from "../models/user.js";
-import Pet from "../models/pet.js";
+import User from "../models/user.js"; 
+import Pet from "../models/pet.js"; 
+import { sendEmail } from "./utils/sendEmail.js";
+
+
+
 
 
 // Apply for adoption
@@ -84,18 +88,15 @@ export async function updateAdoption(req, res) {
       return res.status(400).json({ message: "Cannot update after adoption is finalized" });
     }
 
-    // Update alternateEmail if provided
     if (req.body.alternateEmail !== undefined) {
       adoption.alternateEmail = req.body.alternateEmail || adoption.alternateEmail;
     }
 
-    // Update personal info (merge old + new)
     adoption.personalInfo = {
       ...adoption.personalInfo,
       ...req.body.personalInfo,
     };
 
-    // Update homeEnvironment and experience
     adoption.homeEnvironment = req.body.homeEnvironment || adoption.homeEnvironment;
     adoption.experience = req.body.experience || adoption.experience;
 
@@ -143,26 +144,36 @@ export function deleteAdoptionRequest(req, res) {
 
 
 
-// Fetch all adoption requests (Admin only)
+// Fetch all adoption requests (Admin)
 export async function getAllAdoptionRequests(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Admin only" });
   }
+
   try {
     const adoptions = await Adoption.find({});
+
     const adoptionsWithDetails = await Promise.all(
       adoptions.map(async (adoption) => {
+        // Fetch pet and user
         const pet = await Pet.findOne({ petId: adoption.petId });
-        const user = await User.findOne({ email: adoption.userEmail }); 
-        return {
+        const user = await User.findOne({ email: adoption.userEmail });
+
+        // Build full adoption object
+        const fullAdoption = {
           ...adoption.toObject(),
           petDetails: pet ? pet.toObject() : {},
-          userDetails: user ? user.toObject() : {}
+          userDetails: user ? user.toObject() : {},
         };
+
+        // Remove AI match score completely
+        return fullAdoption;
       })
     );
+
     res.json(adoptionsWithDetails);
   } catch (error) {
+    console.error("Error fetching adoptions:", error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -189,11 +200,11 @@ export async function updateAdoptionStatus(req, res) {
 
     if (req.body.adoptionStatus === "Rejected") {
       adoption.rejectionReason = req.body.rejectionReason || "Rejected by admin";
-      adoption.adoptionDate = null; // reset if previously set
+      adoption.adoptionDate = null; 
     }
 
     if (req.body.adoptionStatus === "Completed") {
-      adoption.adoptionDate = new Date(); // ✅ set completion date
+      adoption.adoptionDate = new Date(); 
     }
 
     const saved = await adoption.save();
@@ -205,13 +216,28 @@ export async function updateAdoptionStatus(req, res) {
         pet.adoptionStatus = "ADOPTED";
         await pet.save();
 
-        await Adoption.updateMany(
-          { petId: saved.petId, _id: { $ne: saved._id } },
-          {
-            adoptionStatus: "Rejected",
-            rejectionReason: "Another applicant was approved",
-          }
-        );
+        // Auto-reject other adoption requests for this pet
+        const otherRequests = await Adoption.find({
+          petId: saved.petId,
+          _id: { $ne: saved._id },
+        });
+
+        for (const other of otherRequests) {
+          other.adoptionStatus = "Rejected";
+          other.rejectionReason = "Another applicant was approved";
+          await other.save();
+
+          // Send email to each auto-rejected user
+          await sendEmail(
+            other.alternateEmail || other.userEmail,
+            "🐾 Adoption Request Update",
+            `
+            Hello ${other.personalInfo?.fullName || "Adopter"},
+            We regret to inform you that your adoption request for ${pet.name} was not approved.
+            Another applicant has been selected. We truly appreciate your compassion and encourage you to adopt again!
+            `
+          );
+        }
       } else if (saved.adoptionStatus === "Rejected") {
         const hasApprovedOrCompleted = await Adoption.findOne({
           petId: saved.petId,
@@ -225,6 +251,31 @@ export async function updateAdoptionStatus(req, res) {
       }
     }
 
+    // Send email to user based on their status
+    if (saved.adoptionStatus === "Approved") {
+      await sendEmail(
+        saved.alternateEmail || saved.userEmail,
+        "🎉 Your Pet Adoption Request Has Been Approved!",
+        `
+        Dear ${saved.personalInfo?.fullName || "Adopter"},
+        Congratulations! Your adoption request for ${pet?.name} has been approved.
+
+        Our team will contact you soon to finalize the adoption process. 🐶🐱
+        `
+      );
+    } else if (saved.adoptionStatus === "Rejected") {
+      await sendEmail(
+        saved.alternateEmail || saved.userEmail,
+        "🐾 Adoption Request Update",
+        `
+        Hello ${saved.personalInfo?.fullName || "Adopter"},
+        We’re sorry to inform you that your adoption request for ${pet?.name} has been rejected.
+
+        Thank you for your kindness — we hope you’ll consider adopting again!
+        `
+      );
+    }
+
     res.json({
       message: `Status updated to ${saved.adoptionStatus}`,
       adoption: saved,
@@ -234,6 +285,7 @@ export async function updateAdoptionStatus(req, res) {
     res.status(500).json({ message: "Failed to update adoption status" });
   }
 }
+
 
 
 // User track their own adoption requests
@@ -266,16 +318,14 @@ export async function getAdoptionById(req, res) {
       return res.status(404).json({ message: "Adoption request not found" });
     }
 
-    // Fetch pet details
     const pet = await Pet.findOne({ petId: adoption.petId });
 
-    // Fetch user details using email (since that's your primary key)
     const user = await User.findOne({ email: adoption.userEmail });
 
     res.json({
       ...adoption.toObject(),
       petDetails: pet ? pet.toObject() : null,
-      userDetails: user ? user.toObject() : null, // ✅ Add user details here
+      userDetails: user ? user.toObject() : null, 
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -283,7 +333,7 @@ export async function getAdoptionById(req, res) {
 }
 
 
-// ✅ Fetch single adoption request by Pet ID (Admin only)
+//Fetch single adoption request by Pet ID (Admin)
 export async function getAdoptionRequestByPetId(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Admin only" });
@@ -295,7 +345,6 @@ export async function getAdoptionRequestByPetId(req, res) {
       return res.status(404).json({ message: "Adoption request not found" });
     }
 
-    // get related pet and user
     const pet = await Pet.findOne({ petId: adoption.petId });
     const user = await User.findOne({ email: adoption.userEmail });
 
@@ -314,7 +363,7 @@ export async function getMyAdoptionByPetId(req, res) {
   try {
     const adoption = await Adoption.findOne({
       petId: req.params.petId,
-      userEmail: req.user.email, // ✅ restrict to logged-in user
+      userEmail: req.user.email, 
     });
 
     if (!adoption) {

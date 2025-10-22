@@ -156,6 +156,35 @@ const paymentSchema = new mongoose.Schema(
           default: true,
         },
       }
+    },
+    
+    // Bank receipt fields for bank transfer payments
+    bankReceiptId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'bankReceipts.files', // GridFS reference
+    },
+    
+    bankReceiptFilename: {
+      type: String,
+      trim: true,
+    },
+    
+    bankDetails: {
+      accountNumber: {
+        type: String,
+        trim: true,
+      },
+      bankName: {
+        type: String,
+        trim: true,
+      },
+      transferDate: {
+        type: Date,
+      },
+      referenceNumber: {
+        type: String,
+        trim: true,
+      },
     }
   },
   { 
